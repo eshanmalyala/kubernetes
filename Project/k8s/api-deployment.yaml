@@ -17,3 +17,6 @@ spec:
         image: getwellsoon.azurecr.io/samples/python-api
         ports:
         - containerPort: 5000
+      imagePullSecrets:
+        - name: acr-secret
+

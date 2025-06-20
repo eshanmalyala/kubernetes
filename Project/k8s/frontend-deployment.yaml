@@ -1,18 +1,19 @@
 apiVersion: apps/v1
-kind: Deployment 
+kind: Deployment
 metadata:
   name: frontend
 spec:
-  replicas: 2
+  replicas: 1
   selector:
     matchLabels:
       app: frontend
-    template:
-      metadata:
+  template:
+    metadata:
+      labels:
         app: frontend
-      spec:
-        containers:
-          name: frontend
-          image: getwellsoon.azurecr.io/samples/python-frontend:latest
-          ports:
-            containterPort: 80
+    spec:
+      containers:
+      - name: frontend
+        image: getwellsoon.azurecr.io/samples/python-frontend
+        ports:
+        - containerPort: 80

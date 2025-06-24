@@ -1,0 +1,13 @@
+steps:
+  # Docker build
+  - name: 'gcr.io/cloud-builders/docker'
+    args: ['build', '-f', 'Project/api/Dockerfile', '-t' ,'us-central1-docker.pkg.dev/${PROJECT_ID}/my-docker-repo/my-image', '.']
+
+  # Docker push
+  - name: 'gcr.io/cloud-builders/docker'
+    args: ['push', 'us-central1-docker.pkg.dev/${PROJECT_ID}/my-docker-repo/my-image']
+    env:
+      - 'CLOUDSDK_COMPUTE_REGION=us-central1'
+      - 'CLOUDSDK_COMPUTE_ZONE=us-central1-a'
+
+logsBucket: 'gs://mybucket579'

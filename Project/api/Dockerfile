@@ -1,6 +1,14 @@
-FROM python:3.9-slim
+# Use the official Python image
+FROM python:3.11-slim
+
+# Set working directory
 WORKDIR /app
-COPY /app/requirements.txt .
-RUN pip install -r requirements.txt 
+
+# Copy files
+COPY requirements.txt ./
+RUN pip install -r requirements.txt
 COPY . .
-CMD ["python", "app.py"]
+
+# Expose port and run app
+ENV PORT=8080
+CMD ["python", "main.py"]

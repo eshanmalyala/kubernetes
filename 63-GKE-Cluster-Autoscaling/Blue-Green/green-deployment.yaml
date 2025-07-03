@@ -1,0 +1,19 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: webapp-green
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      version: green
+  template:
+    metadata:
+      labels:
+        version: green
+    spec:
+      containers:
+      - name: webapp
+        image: tutorialspoint/webapp:v2
+        ports:
+        - containerPort: 80

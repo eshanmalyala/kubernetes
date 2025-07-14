@@ -309,3 +309,18 @@ figure
 ﻿
 
 Nice job! You have successfully stored sensitive data into a Kubernetes Secret resource and used the new Secret into your Deployment definition. This ensures only users with read access over Secret resources will be able to read sensitive data. In the next challenge you will be able to play a bit more in this virtual world before tearing it down.
+
+# The Last Challenge
+Welcome to the Final Challenge!
+
+This is your last chance to experiment in the environment. Clicking Finish Lab will end this little world that flittered into existence just for you.
+
+Take this opportunity to try new things. Don't be afraid to break anything; be curious!
+
+Here are some things to try out:
+
+Using RBAC, create a Role to allow only deploy only CronJobs, but not deployments.
+
+Use secrets to store the TLS certificate files located at /home/pslearner/.minikube/cert.pem and /home/pslearner/.minikube/key.pem. Use the Kubernetes documentation for this.
+
+You have unlimited power within this virtual world - take the time you need for unguided learning.

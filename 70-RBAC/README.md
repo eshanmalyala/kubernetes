@@ -195,3 +195,80 @@ figure
 ﻿
 
 Well done! You have successfully created a Service Account with permissions to create Pods. You have also validated the access by performing the creation operation directly from your Pod, just like your application would do. In the next challenge you will limit the creation of Pods by enforcing security policies.
+
+# Enforce Security Standards While Creating Pods
+﻿Pod Security Policy (PSP) was a Kubernetes feature that allowed administrators to define security conditions for pods. However, it was complex to configure and difficult to audit. The feature was deprecated in Kubernetes v1.21, and removed from Kubernetes in v1.25. Pod Security Standards (PSS) were introduced to provide a simpler framework for managing security.
+
+Instead of administrators deciding what escalations to limit per Pod basis, PSS defines three levels of security:
+
+Privileged: This policy is completely unrestricted, allowing all permissions. It's intended for trusted workloads that require broad access, typically for system-level tasks.
+
+Baseline: A minimally restrictive policy that prevents known privilege escalations while allowing common workloads. It strikes a balance between security and usability, making it suitable for most applications.
+
+Restricted: The most stringent policy, enforcing best practices for pod hardening. It is designed for security-critical applications, ensuring that containers run with minimal privileges and adhere to strict security controls.
+
+The Pod Security Standards are implemented via the Pod Security Admission Controller, which can operate in three modes:
+
+Enforce: Rejects pods that violate the specified policy.
+
+Audit: Allows pods but logs violations for review.
+
+Warn: Allows pods while providing warnings about policy violations.
+
+The Pod Security Admission Controller will read the labels defined in the namespace and apply the required security measures. This means that when you apply a Pod Security Standard label to a namespace, it affects all pods created within that namespace. This lets the wider community define how they want to restrict the behavior of pods in a clear, consistent fashion, ensuring security standards are enforced across organizations. However, if you need to define more granular permissions per Pod basis, you should look at other options like the Open Policy Agent (OPA).
+
+One of the reasons Pod Security Policies were deprecated was due to the difficulty of auditing breaches in the policy. You will now use Pod Security Standards and the Pod Security Admission Controller to restrict and audit what pods can do within your namespace. 
+
+First, create the namespace for this challenge using the kubectl create namespace challenge4 command and then switch to it: kubectl config set-context --current --namespace=challenge4
+
+Label the namespace so pods cannot be run as root. For this you will enforce the restricted level:
+
+kubectl label --overwrite ns challenge4 pod-security.kubernetes.io/enforce=restricted
+
+Now you will create a pod that doesn't meet the policy. Check the provided definition: cat ~/challenges/04/pod-non-compliant.yaml
+
+It defines a pod named non-compliant-pod which runs a busybox container as root (runAsUser: true).
+figure
+﻿
+
+Run the kubectl apply -f ~/challenges/04/pod-non-compliant.yaml command to create the pod. The Pod Security Admission Controller will reject the creation due to several reasons:
+
+allowPrivilegeEscalation is not set to false
+
+capabilities are not restricted
+
+runAsNonRoot is not set to true
+
+seccompProfile is not defined. The type should be set to RuntimeDefault or Localhost
+figure
+﻿
+
+The busybox images by default run as root user, so you will need to create a new image that doesn't run as root:
+
+Check the provided Dockerfile: cat ~/challenges/04/Dockerfile
+
+It defines the steps required to create the image, including the addition of the myuser user.
+figure
+﻿
+
+Set-up docker environment to use minikube's docker daemon: eval $(minikube docker-env)
+
+Build the image: docker build -t non-root-busybox:0.0.1 ~/challenges/04/.
+figure
+It'll output Successfully built
+
+Ensure the new non-root-busybox image is present: docker images
+figure
+﻿
+
+Now that your image is ready, update the Pod definition to meet the security standards. Check the provided definition: cat ~/challenges/04/pod-compliant.yaml
+
+It defines a pod named compliant-pod which uses the image you created previously and also fixes the vulnerabilities raised in the previous apply command. For more details, see Configure a Security Context for a Pod or Container.
+figure
+﻿
+
+Run the kubectl apply -f ~/challenges/04/pod-compliant.yaml command to create the pod, the Pod Security Admission Controller will allow the creation. Then run the kubectl get pods command to ensure the pod has been created and its status is deployed as 1/1 Running.
+figure
+﻿
+
+Awesome! Without much effort you have identified and fixed the security vulnerabilities in your Pod using the Pod Security Admission Controller. In the next challenge you will look into securely storing sensitive data in Kubernetes.

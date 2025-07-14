@@ -272,3 +272,40 @@ figure
 ﻿
 
 Awesome! Without much effort you have identified and fixed the security vulnerabilities in your Pod using the Pod Security Admission Controller. In the next challenge you will look into securely storing sensitive data in Kubernetes.
+
+# Store Secrets in Kubernetes
+﻿Secrets are a mechanism for securely storing and managing sensitive information, such as passwords and tokens, within your Kubernetes cluster. They play a crucial role in enhancing security by keeping sensitive data separate from application code, thereby reducing the risk of accidental exposure. Access to these secrets can be controlled through Role-Based Access Control (RBAC), ensuring that only authorized users and applications can retrieve them. Secrets can be injected into applications as environment variables or mounted as volumes, allowing for secure access at runtime.
+
+In this challenge you will look into minimizing the exposure of your sensitive data. In particular, you will work on securing the password used by a MySQL database.
+
+First, create the namespace for this challenge using the kubectl create namespace challenge5 command and then switch to it: kubectl config set-context --current --namespace=challenge5
+
+Check the provided deployment definition: cat ~/challenges/05/deployment-v1.yaml
+
+It defines a Deployment named mysql, running a single container with the mysql:9.1.0 image. The container has the MYSQL_ROOT_PASSWORD environment variable with password123 as value.
+figure
+﻿
+
+Create the database deployment: kubectl apply -f ~/challenges/05/deployment-v1.yaml. Then run the kubectl get deploy to ensure the deployment has been created. Ensure the status is reported as ready 1/1.
+figure
+﻿
+
+You, as developer and application owner, can have access to the mysql password, stored at the moment in the environment variable. What about a user that has read permissions over Pods? Run the kubectl get deployment mysql -o yaml | grep -i pass command, you will be able to see the password password123.
+figure
+﻿
+
+Create a secret to store the password: kubectl create secret generic mysql-pass --from-literal=password=password123. Then ensure the secret mysql-pass has been created: kubectl get secrets
+figure
+﻿
+
+Now update your deployment to use the new secret and remove the hardcoded password. Check the provided new version of the deployment: cat ~/challenges/05/deployment-v2.yaml. 
+
+The value of the MYSQL_ROOT_PASSWORD is now obtained from the mysql-pass secret.
+figure
+﻿
+
+Deploy the new version of the deployment: kubectl apply -f ~/challenges/05/deployment-v2.yaml, then inspect again the definition of the running deployment by running the kubectl get deployment mysql -o yaml | grep -i pass command. You will not be able to find the password hardcoded.
+figure
+﻿
+
+Nice job! You have successfully stored sensitive data into a Kubernetes Secret resource and used the new Secret into your Deployment definition. This ensures only users with read access over Secret resources will be able to read sensitive data. In the next challenge you will be able to play a bit more in this virtual world before tearing it down.

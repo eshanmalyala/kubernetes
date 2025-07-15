@@ -19,70 +19,67 @@ In this challenge you will create a Role that will allow user1 full control over
 ```bash 
   kubectl config set-context --current --namespace=challenge2
 ```
-Check the provided Role definition: cat ~/challenges/02/role.yaml
+### Check the provided Role definition: cat ~/challenges/02/role.yaml
 
 It defines a Role resource named namespace-admin with a single rule that applies to the Pods resources and allows access to the create, delete, get, list, update, and watch verbs.
 figure
 ﻿
-Create the role Role: kubectl apply -f ~/challenges/02/role.yaml. Then ensure the role has been created by running the kubectl get role command.
+### Create the role Role: kubectl apply -f ~/challenges/02/role.yaml. Then ensure the role has been created by running the kubectl get role command.
 
-Now the Role has been created, associate the Role to user1 by using a RoleBinding resource:
+**Now the Role has been created, associate the Role to user1 by using a RoleBinding resource**:
 
+```` bash
 kubectl create rolebinding user-admin-binding --role namespace-admin --user user1
+````
 
-Then ensure the binding has been created by running the kubectl get rolebinding command.
-figure
-﻿
+**Then ensure the binding has been created by running the kubectl get rolebinding command **﻿
 
 Ensure user1 is able to create Pods in the challenge2 namespace but cannot perform other actions in other namespaces:
 
-Change the user: sudo su user1
+````bash Change the user: sudo su user1 ````
 
-Note: the kube-context for user1 is set to use the challenge2 namespace by default.
+**Note: the kube-context for user1 is set to use the challenge2 namespace by default**
 
-Try to list pods in the kube-system namespace: kubectl get pods -n kube-system
+**Try to list pods in the kube-system namespace**: 
+````bash kubectl get pods -n kube-system ````
 
 Note the user is not able to fetch pods from the kube-system namespace, as you get an error. Remember your role only allows full control over the challenge2 namespace.
-figure
-﻿
 
-The role does allow access to create Pods in the challenge2 namespace, create a pod: kubectl run user1-pod --image busybox:1.37 --command -- sleep 3600
+**The role does allow access to create Pods in the challenge2 namespace, create a pod**:
+````bash kubectl run user1-pod --image busybox:1.37 --command -- sleep 3600 ````
 
-No errors, yay! Ensure the user can also list pods in the challenge2 namespace as defined in the Role: kubectl get pods. Ensure the pod status is displayed as Running.
+No errors, yay! Ensure the user can also list pods in the challenge2 namespace as defined in the Role: 
+**kubectl get pods**. Ensure the pod status is displayed as Running.
 
-Disconnect the session for the user1 user: exit
-figure
-﻿
 
-Good job! The Role for user1 is working as expected. Now you will use a ClusterRole to grant read access to user2 over all Pods in the cluster:
-
-Check the provided definition: cat ~/challenges/02/clusterrole.yaml
+** Check the provided definition: cat ~/challenges/02/clusterrole.yaml**
 
 It defines a ClusterRole resource named global-pod-reader with a single rule that applies to the Pods resources and allows only access to the get, list and watch verbs.
 figure
 ﻿
 
-Run the kubectl apply -f ~/challenges/02/clusterrole.yaml command to create the new ClusterRole.
+**Run the kubectl apply -f ~/challenges/02/clusterrole.yaml command to create the new ClusterRole**.
 
-Create the binding with the kubectl create clusterrolebinding global-pod-reader-binding --clusterrole global-pod-reader --user user2 command. 
+Create the binding with the 
+````bash kubectl create clusterrolebinding global-pod-reader-binding --clusterrole global-pod-reader --user user2 ````
 
 Ensure user2 is able to list any pods within the cluster but it cannot do anything else, for example, create Pods:
 
-Change the user: sudo su user2
+**Change the user: sudo su user2**
+**Note: the kube-context for user2 is set to use the challenge2 namespace by default**.
 
-Note: the kube-context for user2 is set to use the challenge2 namespace by default.
+**Create a pod in the challenge2 namespace**:
+````bash
+ kubectl run user2-pod -n challenge2 --image busybox:1.37 --command -- sleep 3600
 
-Create a pod in the challenge2 namespace: kubectl run user2-pod -n challenge2 --image busybox:1.37 --command -- sleep 3600
-
-Note the user is not able to create Pods. Remember the user is bound to a ClusterRole that only allows read access over Pods.
-figure
+````
+**Note the user is not able to create Pods. Remember the user is bound to a ClusterRole that only allows read access over Pods**.
 ﻿
-
-Ensure the user can list pods in all namespaces: kubectl get pods --all-namespaces
+Ensure the user can list pods in all namespaces:
+````bash kubectl get pods --all-namespaces ````
 
 Disconnect the session for the user2 user: exit
-figure
-﻿
+````
 
 Well done! You have used RBAC to control what actions specific users can perform over certain resources within your cluster. If you are a cluster administrator, these are two good uses cases of RBAC:
 

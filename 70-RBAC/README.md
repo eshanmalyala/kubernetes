@@ -43,93 +43,7 @@ kubectl create clusterrolebinding global-pod-reader-binding --clusterrole global
 kubectl auth can-i get  pods -n challenge2  --as=user1
 
 kubectl auth can-i create pods -n challenge2 --as=user1
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-### Check the provided Role definition: cat ~/challenges/02/role.yaml
-
-It defines a Role resource named namespace-admin with a single rule that applies to the Pods resources and allows access to the create, delete, get, list, update, and watch verbs.
-figure
-﻿
-### Create the role Role: kubectl apply -f ~/challenges/02/role.yaml. Then ensure the role has been created by running the kubectl get role command.
-
-**Now the Role has been created, associate the Role to user1 by using a RoleBinding resource**:
-
-```` bash
-kubectl create rolebinding user-admin-binding --role namespace-admin --user user1
 ````
-
-**Then ensure the binding has been created by running the kubectl get rolebinding command **﻿
-
-Ensure user1 is able to create Pods in the challenge2 namespace but cannot perform other actions in other namespaces:
-
-````bash Change the user: sudo su user1 ````
-
-**Note: the kube-context for user1 is set to use the challenge2 namespace by default**
-
-**Try to list pods in the kube-system namespace**: 
-````bash kubectl get pods -n kube-system ````
-
-Note the user is not able to fetch pods from the kube-system namespace, as you get an error. Remember your role only allows full control over the challenge2 namespace.
-
-**The role does allow access to create Pods in the challenge2 namespace, create a pod**:
-````bash kubectl run user1-pod --image busybox:1.37 --command -- sleep 3600 ````
-
-No errors, yay! Ensure the user can also list pods in the challenge2 namespace as defined in the Role: 
-**kubectl get pods**. Ensure the pod status is displayed as Running.
-
-
-** Check the provided definition: cat ~/challenges/02/clusterrole.yaml**
-
-It defines a ClusterRole resource named global-pod-reader with a single rule that applies to the Pods resources and allows only access to the get, list and watch verbs.
-figure
-﻿
-
-**Run the kubectl apply -f ~/challenges/02/clusterrole.yaml command to create the new ClusterRole**.
-
-Create the binding with the 
-````bash kubectl create clusterrolebinding global-pod-reader-binding --clusterrole global-pod-reader --user user2 ````
-
-Ensure user2 is able to list any pods within the cluster but it cannot do anything else, for example, create Pods:
-
-**Change the user: sudo su user2**
-**Note: the kube-context for user2 is set to use the challenge2 namespace by default**.
-
-**Create a pod in the challenge2 namespace**:
-````bash
- kubectl run user2-pod -n challenge2 --image busybox:1.37 --command -- sleep 3600
-
-````
-**Note the user is not able to create Pods. Remember the user is bound to a ClusterRole that only allows read access over Pods**.
-﻿
-Ensure the user can list pods in all namespaces:
-````bash kubectl get pods --all-namespaces ````
-
-Disconnect the session for the user2 user: exit
-````
-
-Well done! You have used RBAC to control what actions specific users can perform over certain resources within your cluster. If you are a cluster administrator, these are two good uses cases of RBAC:
 
 Limit app developers access: Create Roles to grant developers access to only the namespaces they own. If a developer is just working on the component that allows payments on your websites, they don't need access to the kube-system namespace for example, where the kube-apiserver runs.
 
@@ -137,24 +51,9 @@ Manage permissions for your operational team: You will probably need a team that
 
 To verify the user permissions without actually using their credentials to authenticate against the kube-apiserver, you can also use kubectl  auth can-i command. For example, you can run the following commands to check the permissions of the user1 and user2 users:
 
-user1 can read pods in the challenge2 namespace: kubectl auth can-i get pods -n challenge2 --as=user1
-
-user1 can NOT read pods in the kube-system namespace: kubectl auth can-i get pods -n kube-system --as=user1
-
-user1 can create pods in the challenge2 namespace: kubectl auth can-i create pods -n challenge2 --as=user1
-
-user2 can read pods in the challenge2 namespace: kubectl auth can-i get pods -n challenge2 --as=user2
-
-user2 can read pods in the kube-system namespace: kubectl auth can-i get pods -n challenge2 --as=user2
-
-user2 can NOT create pods in the challenge2 namespace: kubectl auth can-i create pods -n challenge2 --as=user2
-figure
-﻿
-
-What about the actions running Pods can perform over the cluster? Each Pod runs as a Service Account, in the next challenge you will learn how to create service accounts and provision roles to them.
-
 # Allow a Pod to Communicate with the API Server
-﻿Service Accounts provide an identity for processes running in pods, allowing them to authenticate with the Kubernetes API and access resources based on the permissions granted to that service account.
+
+ Service Accounts provide an identity for processes running in pods, allowing them to authenticate with the Kubernetes API and access resources based on the permissions granted to that service account.
 
 By default, every namespace in Kubernetes has a Service Account named default. If you don't specify a service account when creating a pod, Kubernetes automatically assigns this default service account to the pod. This Service Account does not have any permissions assigned to it by default (except for basic API discovery permissions if RBAC is enabled) - it will be able to authenticate and access the Kubernetes API but it will not be able to perform any operations.
 

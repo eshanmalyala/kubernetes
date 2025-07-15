@@ -1,47 +1,30 @@
-Use RBAC to Limit User Permissions
+# Use RBAC to Limit User Permissions
 Kubernetes is a powerful container orchestration platform, but with great power comes the need for robust security measures. In this challenge you will focus on understanding a fundamental aspect of Kubernetes security: RBAC (Role-Based Access Control). 
 
 RBAC in Kubernetes is used to control the actions users or groups can perform over specific resources within the cluster. To implement RBAC in Kubernetes, you will make use of different resources:
 
-Roles and ClusterRoles: They define a set of rules. These rules are purely additive, meaning they are no deny rules (you will only be able to allow access but not deny). Roles are tied to a namespace whereas ClusterRoles are not namespace specific, they are cluster-scoped.
+### Roles and ClusterRoles:
+They define a set of rules. These rules are purely additive, meaning they are no deny rules (you will only be able to allow access but not deny). Roles are tied to a namespace whereas ClusterRoles are not namespace specific, they are cluster-scoped.
 
-RoleBindings and ClusterRoleBindings: They bind a specific Role or ClusterRoles to users, groups or service accounts to grant them the permissions defined in the roles.
+## RoleBindings and ClusterRoleBindings: 
+They bind a specific Role or ClusterRoles to users, groups or service accounts to grant them the permissions defined in the roles.
 
 In this challenge you will create a Role that will allow user1 full control over Pods in the challenge2 namespace. You will also create a ClusterRole to allow user2 to list Pods in the entire cluster, but user2 will not be able to modify or create new Pods.
 
-Before starting, you will ensure your Kubernetes cluster is ready (Note: minikube is being used):
-
-Once ready, click the Open environment button to access the lab Ubuntu Desktop.
-
-It takes about one to three minutes for the button to become available.
-
-At the bottom of your lab's Desktop, click Terminal Emulator.
-
-In the Terminal, ensure the environment is ready by running the status command.
-
-If the output is SYSTEM COMPLETE, you are good to go! If you still get INITIALIZING, give it a few minutes and try again, it will take about three to six minutes; the lab is spinning up a kubernetes cluster for you!
-
-Once the environment is up, ensure all kubernetes components are up: kubectl get pods -A
-
-The output of the command should display all pods as Running, and ready containers as 1/1.
-
-If any containers are NOT shown as 1/1, give it a minute and try again before proceeding further.
-figure
-Note: You can copy commands, and paste them into the Terminal by using Control+Shift+V.
-
-Great! Now that your environment is ready, you can start creating the Role for user1:
-
-First, create the namespace for this challenge using the kubectl create namespace challenge2 command and then switch to it: kubectl config set-context --current --namespace=challenge2
-
+**First, create the namespace for this challenge using the**
+```bash 
+ kubectl create namespace challenge2
+```
+**command and then switch to it**:
+```bash 
+  kubectl config set-context --current --namespace=challenge2
+```
 Check the provided Role definition: cat ~/challenges/02/role.yaml
 
 It defines a Role resource named namespace-admin with a single rule that applies to the Pods resources and allows access to the create, delete, get, list, update, and watch verbs.
 figure
 ﻿
-
 Create the role Role: kubectl apply -f ~/challenges/02/role.yaml. Then ensure the role has been created by running the kubectl get role command.
-figure
-namespace-admin will appear in the output.
 
 Now the Role has been created, associate the Role to user1 by using a RoleBinding resource:
 

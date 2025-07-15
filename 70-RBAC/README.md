@@ -7,6 +7,8 @@ They define a set of rules. These rules are purely additive, meaning they are no
 ### RoleBindings and ClusterRoleBindings:
 They bind a specific Role or ClusterRoles to users, groups or service accounts to grant them the permissions defined in the roles.
 
+### can start creating the Role for user1:
+
 **create a namespace**
 ````bash
 kubectl create namespace challenge2
@@ -15,6 +17,54 @@ kubectl create namespace challenge2
 ````bash
 kubectl config set-context  --current --namespace=challenge2
 ````
+**Create the role Role: kubectl apply -f ~/challenges/02/role.yaml. Then ensure the role has been created by running the kubectl get role command**.
+
+**Now the Role has been created, associate the Role to user1 by using a RoleBinding resource**:
+````bash
+kubectl create rolebinding user-admin-binding --role namespace-admin --user user1
+````
+**Login user1 and check kubectl get pods you will be able to see all pods list in user1 only for created namespace access**
+
+**The role does allow access to create Pods in the challenge2 namespace, create a pod**:
+
+````bash
+kubectl run user1-pod --image busybox:1.37 --command -- sleep 3600
+````
+###  can start creating the ClusterRole for user1:
+
+````bash
+kubectl apply -f clusterRole.yaml
+
+kubectl create clusterrolebinding global-pod-reader-binding --clusterrole global-pod-reader --user user2
+````
+
+**To verify the user permissions without actually using their credentials to authenticate against the kube-apiserver, you can also use kubectl  auth can-i command. For example, you can run the following commands to check the permissions of the user1 and user2 users**:
+````bash
+kubectl auth can-i get  pods -n challenge2  --as=user1
+
+kubectl auth can-i create pods -n challenge2 --as=user1
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 ### Check the provided Role definition: cat ~/challenges/02/role.yaml
